@@ -64,6 +64,7 @@ export const GlobalStyles = createGlobalStyle`
       align-items: center;
       text-decoration: none;
       color: white;
+      max-width: 100%;
       font-size: 1.5rem;
       font-weight: bold;
 
