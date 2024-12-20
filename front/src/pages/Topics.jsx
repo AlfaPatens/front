@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { getTopics, createTopic, updateTopic, deleteTopic } from "../services/topicsService";
 import { getUserNameById } from "../services/authService";
+import { getLoggedInUsername } from "../services/authUtils"; // Import utility function
 
 const TopicsContainer = styled.main`
   margin-top: 3rem;
@@ -16,78 +17,58 @@ const TopicsContainer = styled.main`
   }
 
   .form-container {
-  display: flex;
-  flex-direction: column; /* Align input fields vertically */
-  gap: 0.5rem;
-  margin-top: 1rem;
-
-  input,
-  textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #555;
-    border-radius: 5px;
-    background-color: #333;
-    color: white;
-    font-size: 1rem;
-  }
-
-  textarea {
-    height: 80px; /* Set a proper height for visibility */
-    resize: none;
-  }
-
-  .button-group {
     display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-  }
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
 
-  button {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
+    input,
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #555;
+      border-radius: 5px;
+      background-color: #333;
+      color: white;
+      font-size: 1rem;
+    }
 
-    &.save {
+    textarea {
+      resize: none;
+      height: 80px;
+    }
+
+    button {
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 5px;
       background-color: #007bff;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
 
       &:hover {
         background-color: #0056b3;
       }
     }
-
-    &.cancel {
-      background-color: #6c757d;
-
-      &:hover {
-        background-color: #5a6268;
-      }
-    }
   }
-}
-li p {
-    color: #ccc; /* Default color for description */
-}
 
-li p:last-of-type {
-    color: #aaa; /* Lighter color for "Created by" text */
-    font-size: 0.9rem; /* Smaller font size */
-    margin-top: 0.5rem;
-}
   ul {
     list-style: none;
     padding: 0;
 
     li {
-        
       margin: 1rem auto;
       background-color: #1f1f1f;
       padding: 1.5rem;
       border-radius: 8px;
       max-width: 500px;
       text-align: left;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
       h3 {
         margin: 0;
@@ -100,8 +81,14 @@ li p:last-of-type {
       }
 
       p {
-        margin-bottom: 1rem;
+        margin: 0.5rem 0;
         color: #ccc;
+      }
+
+      .creator {
+        font-size: 0.9rem;
+        color: #aaa;
+        margin-top: 0.5rem;
       }
 
       .buttons {
@@ -114,7 +101,7 @@ li p:last-of-type {
           border-radius: 5px;
           color: white;
           cursor: pointer;
-          transition: background 0.3s;
+          transition: background-color 0.3s;
 
           &.edit {
             background-color: #ffc107;
@@ -144,7 +131,8 @@ export default function Topics() {
     const [error, setError] = useState(null);
     const [newTopic, setNewTopic] = useState({ title: "", description: "" });
     const [editingTopic, setEditingTopic] = useState(null);
-
+    const currentUserName = getLoggedInUsername(); // Get the logged-in username
+    const adminUsername = "admin";
     useEffect(() => {
         const fetchTopics = async () => {
             try {
@@ -277,26 +265,28 @@ export default function Topics() {
                                 <p style={{ fontSize: "0.9rem", color: "#aaa", marginTop: "0.5rem" }}>
                                     Created by: {topic.userName || "Unknown"}
                                 </p>
-                                <div className="buttons">
-                                    <button
-                                        className="edit"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setEditingTopic({ id: topic.id, description: topic.description });
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        className="delete"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDelete(topic.id);
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
+                                    {(topic.userName === currentUserName || currentUserName === adminUsername) && (
+                                    <div className="buttons">
+                                        <button
+                                            className="edit"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditingTopic({ id: topic.id, description: topic.description });
+                                            }}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="delete"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(topic.id);
+                                            }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                )}
                             </>
                         )}
                     </li>

@@ -1,7 +1,76 @@
 ﻿import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
-import logo from "../assets/ChadHub.png";
+import jwtDecode from "jwt-decode";
+import styled from "styled-components";
+import logo from "../assets/GigaChat1.png";
+
+const HeaderContainer = styled.header`
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #1f1f1f;
+  color: white;
+`;
+
+const LeftNav = styled.div`
+  display: flex;
+  align-items: center;
+
+  .logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+
+    img {
+      height: 40px;
+      margin-right: 0.5rem;
+    }
+  }
+`;
+
+const CenterNav = styled.nav`
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+
+  .nav-link {
+    text-decoration: none;
+    color: #00aced;
+    font-size: 1.2rem;
+
+    &:hover {
+      color: #ffa726;
+    }
+  }
+`;
+
+const RightNav = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .nav-button {
+    background: orange;
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+      background: darkorange;
+    }
+  }
+`;
 
 const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -15,7 +84,6 @@ const Header = () => {
 
             try {
                 const decoded = jwtDecode(token);
-                // Extract the username using the claim key
                 const username =
                     decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "User";
                 setUsername(username);
@@ -32,88 +100,47 @@ const Header = () => {
         navigate("/"); // Redirect to home
     };
 
-    const styles = {
-        header: {
-            width: "100%",
-            position: "fixed",
-            top: 0,
-            left: 0,
-            zIndex: 1000,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "1rem 2rem",
-            backgroundColor: "#1f1f1f",
-            color: "white",
-        },
-        logo: {
-            display: "flex",
-            alignItems: "center",
-            textDecoration: "none",
-            color: "white",
-            fontSize: "1.5rem",
-            fontWeight: "bold",
-        },
-        logoImage: {
-            height: "40px",
-            marginRight: "0.5rem",
-        },
-        nav: {
-            display: "flex",
-            gap: "1rem",
-        },
-        navLink: {
-            textDecoration: "none",
-            color: "#00aced",
-            fontSize: "1.2rem",
-        },
-        navButton: {
-            background: "none",
-            border: "none",
-            color: "#00aced",
-            fontSize: "1.2rem",
-            cursor: "pointer",
-            padding: 0,
-        },
-    };
-
     return (
-        <>
-            <div style={{ height: "70px" }}></div>
-            <header style={styles.header}>
-                <Link to="/" style={styles.logo}>
-                    <img src={logo} alt="ChadHub Logo" style={styles.logoImage} />
-                    ChadHub
+        <HeaderContainer>
+            {/* Left Navigation */}
+            <LeftNav>
+                <Link to="/" className="logo">
+                    <img src={logo} alt="GigaChat Logo" />
+                    GigaChat
                 </Link>
-                <nav style={styles.nav}>
-                    <Link to="/" style={styles.navLink}>
-                        Home
-                    </Link>
-                    <Link to="/topics" style={styles.navLink}>
-                        Topics
-                    </Link>
-                    {isLoggedIn ? (
-                        <>
-                            <span style={{ color: "#ccc", fontSize: "1.2rem" }}>
-                                User: {username}
-                            </span>
-                            <button onClick={handleLogout} style={styles.navButton}>
-                                Logout
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <Link to="/login" style={styles.navLink}>
-                                Login
-                            </Link>
-                            <Link to="/register" style={styles.navLink}>
-                                Register
-                            </Link>
-                        </>
-                    )}
-                </nav>
-            </header>
-        </>
+            </LeftNav>
+
+            {/* Center Navigation */}
+            <CenterNav>
+                <Link to="/" className="nav-link">
+                    Home
+                </Link>
+                <Link to="/topics" className="nav-link">
+                    Topics
+                </Link>
+            </CenterNav>
+
+            {/* Right Navigation */}
+            <RightNav>
+                {isLoggedIn ? (
+                    <>
+                        <span>User: {username}</span>
+                        <button onClick={handleLogout} className="nav-button">
+                            Logout
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <Link to="/login" className="nav-link">
+                            Login
+                        </Link>
+                        <Link to="/register" className="nav-link">
+                            Register
+                        </Link>
+                    </>
+                )}
+            </RightNav>
+        </HeaderContainer>
     );
 };
 

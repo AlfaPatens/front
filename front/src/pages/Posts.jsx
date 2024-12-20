@@ -4,74 +4,60 @@ import styled from "styled-components";
 import { getPostsByTopic, createPost, updatePost, deletePost } from "../services/postsService";
 import { getTopics } from "../services/topicsService";
 import { getUserNameById } from "../services/authService"; // Import the username function
-
+import { getLoggedInUsername } from "../services/authUtils"; // Import utility function
 
 const PostsContainer = styled.main`
-    margin-top: 3rem;
+  margin-top: 3rem;
   text-align: center;
 
   h2 {
-    font-size: 3rem;
-    margin-bottom: 2rem;
-    color: white;
-  }
-
-  ul li p:last-of-type {
-    font-size: 0.9rem;
-    color: #aaa;
-    margin-top: 0.5rem;
+    font-size: 2.8rem;
+    margin-bottom: 1.5rem;
+    color: #f8f9fa;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
   }
 
   .form-container {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    align-items: center;
-    margin-bottom: 2rem;
+    gap: 1rem;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    background: #212529;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
     input,
     textarea {
       width: 100%;
-      max-width: 500px;
-      padding: 0.75rem;
-      border: 1px solid #555;
-      border-radius: 5px;
-      background-color: #333;
-      color: white;
+      padding: 1rem;
+      background-color: #343a40;
+      border: 1px solid #495057;
+      color: #f8f9fa;
+      border-radius: 8px;
       font-size: 1rem;
     }
 
     textarea {
-      height: 80px;
+      height: 100px;
       resize: none;
     }
 
-    .button-group {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
+    button {
+      align-self: flex-end;
+      padding: 0.75rem 1.5rem;
+      background-color: #17c671;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.3s ease, background-color 0.3s ease;
 
-      button {
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        color: white;
-
-        &.create {
-          background-color: #28a745;
-          &:hover {
-            background-color: #218838;
-          }
-        }
-
-        &.cancel {
-          background-color: #6c757d;
-          &:hover {
-            background-color: #5a6268;
-          }
-        }
+      &:hover {
+        background-color: #12a358;
+        transform: scale(1.05);
       }
     }
   }
@@ -81,46 +67,68 @@ const PostsContainer = styled.main`
     padding: 0;
 
     li {
-      margin: 1rem auto;
-      background-color: #1f1f1f;
+      background-color: #212529;
       padding: 1.5rem;
-      border-radius: 8px;
-      max-width: 500px;
+      margin: 1rem auto;
+      border-radius: 12px;
+      max-width: 600px;
       text-align: left;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 
       h3 {
         margin: 0 0 1rem;
         color: #00aced;
         cursor: pointer;
+
+        &:hover {
+          text-decoration: underline;
+          color: #38bdf8;
+        }
       }
 
       p {
-        margin-bottom: 1rem;
-        color: #ccc;
+        color: #dee2e6;
+        margin: 0.5rem 0;
+        line-height: 1.4;
+      }
+
+      .creator {
+        font-size: 0.9rem;
+        color: #adb5bd;
+        margin-top: 0.8rem;
       }
 
       .buttons {
         display: flex;
+        justify-content: flex-end;
         gap: 1rem;
+        margin-top: 1rem;
 
         button {
           padding: 0.5rem 1rem;
           border: none;
-          border-radius: 5px;
-          color: white;
+          border-radius: 8px;
+          font-size: 0.9rem;
           cursor: pointer;
+          transition: transform 0.3s ease, background-color 0.3s ease;
 
           &.edit {
             background-color: #ffc107;
+            color: #212529;
+
             &:hover {
               background-color: #e0a800;
+              transform: scale(1.05);
             }
           }
 
           &.delete {
             background-color: #dc3545;
+            color: white;
+
             &:hover {
               background-color: #c82333;
+              transform: scale(1.05);
             }
           }
         }
@@ -138,6 +146,9 @@ export default function PostsPage() {
     const [topicName, setTopicName] = useState("");
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const currentUserName = getLoggedInUsername(); // Get the logged-in username
+    //const [topicId, setTopicId] = useState("");
+    const adminUsername = "admin";
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -157,6 +168,7 @@ export default function PostsPage() {
                 const topics = await getTopics();
                 const currentTopic = topics.find((t) => t.id === parseInt(topicId));
                 setTopicName(currentTopic?.title || "Unknown Topic");
+                //setTopicId(currentTopic?.id || "Unknown Topic");
             } catch (err) {
                 console.error("Error fetching posts:", err);
             } finally {
@@ -274,7 +286,10 @@ export default function PostsPage() {
                             <>
                                 <h3
                                     style={{ cursor: "pointer" }}
-                                    onClick={() => navigate(`/topics/${topicId}/posts/${post.id}`)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/topics/${topicId}/posts/${post.id}`);
+                                    }}
                                 >
                                     {post.title}
                                 </h3>
@@ -282,17 +297,19 @@ export default function PostsPage() {
                                 <p style={{ fontSize: "0.9rem", color: "#aaa", marginTop: "0.5rem" }}>
                                     Created by: {post.userName || "Unknown"}
                                 </p>
-                                <div className="buttons">
-                                    <button
-                                        className="edit"
-                                        onClick={() => setEditingPost({ id: post.id, body: post.body })}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button className="delete" onClick={() => handleDelete(post.id)}>
-                                        Delete
-                                    </button>
-                                </div>
+                                    {(post.userName === currentUserName || currentUserName === adminUsername) && (
+                                    <div className="buttons">
+                                        <button
+                                            className="edit"
+                                            onClick={() => setEditingPost({ id: post.id, body: post.body })}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button className="delete" onClick={() => handleDelete(post.id)}>
+                                            Delete
+                                        </button>
+                                    </div>
+                                )}
                             </>
                         )}
                     </li>
